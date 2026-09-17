@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NAUOxO — Proyectos</title>
+  <style>
+    * { box-sizing:border-box; }
+    html,body { width:100%;height:100%;margin:0;overflow:hidden;background:#050719;color:#f7f3d5;font-family:Consolas,"Courier New",monospace; }
+    main { position:relative;width:100%;height:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,42vw);align-items:center;gap:5vw;padding:6vh 8vw;isolation:isolate;background:radial-gradient(circle at 72% 48%,rgba(77,53,149,.46),transparent 30%),radial-gradient(circle at 12% 80%,rgba(0,156,190,.2),transparent 38%),linear-gradient(145deg,#040615,#0d1236 58%,#1b0b35); }
+    main:after { content:"";position:absolute;inset:0;z-index:9;pointer-events:none;background:radial-gradient(ellipse at center,transparent 48%,rgba(1,2,10,.72)); }
+    .copy { position:relative;z-index:4;max-width:760px; }
+    .eyebrow { margin:0 0 1.2rem;color:#75e8ff;font-size:clamp(.8rem,1.1vw,1rem);font-weight:700;letter-spacing:.38em;text-transform:uppercase; }
+    h1 { margin:0;font:900 clamp(2.6rem,5.7vw,6.5rem)/.94 Impact,"Arial Black",sans-serif;letter-spacing:.02em;text-wrap:balance;text-shadow:4px 5px 0 rgba(112,74,205,.34),0 0 42px rgba(117,232,255,.15); }
+    .prompt { display:inline-flex;align-items:center;gap:.7rem;margin-top:2rem;color:rgba(255,255,255,.62);font-size:clamp(.78rem,1vw,1rem);letter-spacing:.08em; }
+    .prompt i { width:8px;height:8px;border-radius:50%;background:#80ffb5;box-shadow:0 0 14px #80ffb5;animation:blink 1.3s steps(2) infinite; }
+    .qr-wrap { position:relative;z-index:5;justify-self:center;width:min(39vw,520px);aspect-ratio:1;display:grid;place-items:center;padding:clamp(16px,2vw,28px);border:1px solid rgba(117,232,255,.34);border-radius:28px;background:rgba(245,247,255,.96);box-shadow:0 0 0 8px rgba(117,232,255,.035),0 30px 90px rgba(0,0,0,.48),0 0 50px rgba(126,97,255,.22);animation:qrFloat 5s ease-in-out infinite; }
+    .qr-wrap:before,.qr-wrap:after { content:"";position:absolute;width:44px;height:44px;border-color:#75e8ff;opacity:.7; }
+    .qr-wrap:before { left:-10px;top:-10px;border-left:2px solid;border-top:2px solid; }
+    .qr-wrap:after { right:-10px;bottom:-10px;border-right:2px solid;border-bottom:2px solid; }
+    #qr { display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated; }
+    .fly { position:absolute;z-index:2;left:-18vw;color:rgba(117,232,255,.5);font-weight:700;white-space:nowrap;text-shadow:0 0 14px rgba(117,232,255,.45);animation:fly linear infinite; }
+    .star { position:absolute;z-index:1;width:2px;height:2px;border-radius:50%;background:#fff;box-shadow:0 0 9px 2px rgba(117,232,255,.6);animation:twinkle 3s ease-in-out infinite; }
+    .orbit { position:absolute;z-index:1;right:1vw;top:13vh;width:50vw;height:62vh;border:1px dashed rgba(117,232,255,.16);border-radius:50%;transform:rotate(-14deg);animation:orbit 12s ease-in-out infinite alternate; }
+    .number { position:absolute;left:2vw;bottom:2vh;z-index:4;color:rgba(255,255,255,.16);font-size:.75rem;letter-spacing:.3em; }
+    @keyframes fly { from{transform:translateX(0) rotate(-2deg)} to{transform:translateX(136vw) rotate(2deg)} }
+    @keyframes qrFloat { 50%{transform:translateY(-12px);box-shadow:0 0 0 8px rgba(117,232,255,.05),0 42px 100px rgba(0,0,0,.5),0 0 70px rgba(126,97,255,.3)} }
+    @keyframes twinkle { 0%,100%{opacity:.18;transform:scale(.7)} 50%{opacity:1;transform:scale(1.35)} }
+    @keyframes blink { 50%{opacity:.2} }
+    @keyframes orbit { to{transform:rotate(-8deg) scale(1.05);opacity:.55} }
+    @media(max-width:760px){main{grid-template-columns:1fr;align-content:center;text-align:center;padding:7vh 6vw}.copy{display:grid;justify-items:center}.eyebrow{margin-bottom:.7rem}h1{font-size:clamp(2rem,9vw,3.6rem)}.prompt{margin-top:1rem}.qr-wrap{width:min(68vw,390px);border-radius:20px}.orbit{width:100vw;right:-20vw}.fly:nth-of-type(even){display:none}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important}}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="orbit"></div>
+    <section class="copy">
+      <p class="eyebrow">&lt; NAUOxO /&gt;</p>
+      <h1>Para más información, visitar los proyectos:</h1>
+      <div class="prompt"><i></i> escanear_código();</div>
+    </section>
+    <figure class="qr-wrap"><img id="qr" alt="Código QR del proyecto"></figure>
+    <div class="number" id="number"></div>
+    <div id="motion" aria-hidden="true"></div>
+  </main>
+  <script>
+    const params=new URLSearchParams(location.search);
+    document.getElementById('qr').src=params.get('qr')||'qr-proyecto-1.png';
+    document.getElementById('number').textContent=`PROYECTO_${params.get('n')||'01'} // INFORMACIÓN`;
+    const motion=document.getElementById('motion');
+    const symbols=['{ crear(); }','&lt;/imaginar&gt;','si (curiosidad)','mientras (aprendo)','01001110','[ compartir ]','→ futuro'];
+    symbols.forEach((text,i)=>{const el=document.createElement('span');el.className='fly';el.innerHTML=text;Object.assign(el.style,{top:`${8+(i*13)%78}%`,fontSize:`${12+(i%3)*3}px`,animationDuration:`${18+(i%4)*5}s`,animationDelay:`-${i*6}s`});motion.appendChild(el)});
+    for(let i=0;i<55;i++){const star=document.createElement('i');star.className='star';Object.assign(star.style,{left:`${(i*43+7)%100}%`,top:`${(i*29+11)%94}%`,animationDelay:`-${(i*.31)%4}s`});motion.appendChild(star)}
+  </script>
+</body>
+</html>

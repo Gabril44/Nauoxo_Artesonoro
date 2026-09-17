@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mañic: La Gran Persecución Astral</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #05051e;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        h1 {
+            margin: 10px 0;
+            color: #ffcc66;
+            font-size: 24px;
+        }
+        canvas {
+            border: 2px solid #4a90e2;
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
+            background-color: #08081f;
+        }
+        .instructions {
+            margin-top: 10px;
+            color: #aaaaaa;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Mañic: La Gran Persecución Astral</h1>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="instructions">Controles: Flechas o A/D para moverte | ESPACIO o Flecha Arriba para saltar / continuar</div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let gameState = "STORY";
+        let currentLevelIndex = 0;
+        let score = 0;
+
+        const player = {
+            x: 100,
+            y: 300,
+            width: 52,
+            height: 72,
+            speed: 260,
+            yVelocity: 0,
+            jumpForce: -720,
+            isGrounded: false,
+            frame: 0,
+            animationTimer: 0,
+            frameDuration: 0.12
+        };
+
+        const playerSprites = ["niño1.jpg", "niño2.jpg", "niño3.jpg"].map(source => {
+            const image = new Image();
+            image.src = source;
+            return image;
+        });
+
+        const gravity = 1400;
+        let cameraX = 0;
+        const bgStars = [];
+
+        for (let i = 0; i < 200; i++) {
+            bgStars.push({
+                x: Math.random() * 3000,
+                y: Math.random() * 600,
+                size: Math.random() * 2 + 1
+            });
+        }
+
+        const levels = [
+            {
+                title: "Nivel 1: El Despertar de Nauoxo",
+                story: "En la primavera (Nauoxo), el monte resurge.\nRecolecta las Flores Astrales y evita las espinas del monte.\n\n[ Presiona ESPACIO para comenzar ]",
+                playerStart: { x: 100, y: 300 },
+                platforms: [
+                    { x: 0, y: 500, width: 1200, height: 100, name: "Suelo del Monte" },
+                    { x: 300, y: 380, width: 160, height: 20, name: "Araxanaxaui" },
+                    { x: 580, y: 290, width: 140, height: 20, name: "Chi’ishe" },
+                    { x: 850, y: 200, width: 200, height: 20, name: "Lapacho Astral" }
+                ],
+                items: [
+                    { x: 350, y: 340, width: 16, height: 16, collected: false, name: "Flor Astral" },
+                    { x: 620, y: 250, width: 16, height: 16, collected: false, name: "Flor Astral" },
+                    { x: 900, y: 160, width: 16, height: 16, collected: false, name: "Flor Astral" }
+                ],
+                hazards: [
+                    { x: 500, y: 480, width: 40, height: 20, name: "Espina del Monte" }
+                ],
+                goal: { x: 980, y: 140, width: 40, height: 40 }
+            },
+            {
+                title: "Nivel 2: La Furia de la Abuela Caníbal",
+                story: "Esquiva las tramas de fuego de la anciana y recolecta los Espíritus de Pioxol para escapar.\n\n[ Presiona ESPACIO para comenzar ]",
+                playerStart: { x: 50, y: 400 },
+                platforms: [
+                    { x: 0, y: 520, width: 300, height: 80, name: "Suelo Seguro" },
+                    { x: 380, y: 420, width: 120, height: 20, name: "Consejo Paloma" },
+                    { x: 580, y: 320, width: 120, height: 20, name: "Pioxol 1" },
+                    { x: 780, y: 220, width: 120, height: 20, name: "Pioxol 2" },
+                    { x: 980, y: 150, width: 180, height: 20, name: "Cielo Seguro" }
+                ],
+                items: [
+                    { x: 420, y: 380, width: 16, height: 16, collected: false, name: "Espíritu Pioxol" },
+                    { x: 620, y: 280, width: 16, height: 16, collected: false, name: "Espíritu Pioxol" },
+                    { x: 820, y: 180, width: 16, height: 16, collected: false, name: "Espíritu Pioxol" }
+                ],
+                hazards: [
+                    { x: 300, y: 500, width: 80, height: 20, name: "Fuego Trampa" },
+                    { x: 500, y: 500, width: 80, height: 20, name: "Fuego Trampa" }
+                ],
+                goal: { x: 1050, y: 90, width: 40, height: 40 }
+            },
+            {
+                title: "Nivel 3: La Cacería del Mañic Nqa'aic",
+                story: "Sigue el camino de las estrellas sobre las constelaciones para alcanzar al Ñandú.\n\n[ Presiona ESPACIO para comenzar ]",
+                playerStart: { x: 100, y: 300 },
+                platforms: [
+                    { x: 0, y: 500, width: 400, height: 100, name: "Suelo del Monte" },
+                    { x: 320, y: 380, width: 150, height: 20, name: "Dapichí" },
+                    { x: 550, y: 280, width: 130, height: 20, name: "Vicaic" },
+                    { x: 800, y: 200, width: 180, height: 20, name: "Peraxanaxal" },
+                    { x: 1100, y: 140, width: 300, height: 20, name: "Vía Láctea" }
+                ],
+                items: [
+                    { x: 380, y: 340, width: 16, height: 16, collected: false, name: "Pluma de Mañic" },
+                    { x: 600, y: 240, width: 16, height: 16, collected: false, name: "Pluma de Mañic" },
+                    { x: 880, y: 160, width: 16, height: 16, collected: false, name: "Pluma de Mañic" }
+                ],
+                hazards: [
+                    { x: 400, y: 500, width: 700, height: 20, name: "Abismo Astral" }
+                ],
+                goal: { x: 1280, y: 80, width: 40, height: 40 }
+            }
+        ];
+
+        const keys = {};
+
+        window.addEventListener("keydown", (e) => {
+            keys[e.code] = true;
+
+            if (gameState === "STORY" && (e.code === "Space" || e.code === "Enter")) {
+                gameState = "PLAYING";
+            } else if (gameState === "PLAYING" && (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") && player.isGrounded) {
+                player.yVelocity = player.jumpForce;
+                player.isGrounded = false;
+            } else if (gameState === "VICTORY" && (e.code === "KeyR" || e.code === "Space")) {
+                score = 0;
+                currentLevelIndex = 0;
+                loadLevel(0);
+            }
+        });
+
+        window.addEventListener("keyup", (e) => {
+            keys[e.code] = false;
+        });
+
+        function loadLevel(index) {
+            const lvl = levels[index];
+            player.x = lvl.playerStart.x;
+            player.y = lvl.playerStart.y;
+            player.yVelocity = 0;
+            player.isGrounded = false;
+
+            lvl.items.forEach(item => item.collected = false);
+            gameState = "STORY";
+        }
+
+        function checkCollision(a, b) {
+            return a.x < b.x + b.width &&
+                   a.x + a.width > b.x &&
+                   a.y < b.y + b.height &&
+                   a.y + a.height > b.y;
+        }
+
+        let lastTime = 0;
+        function gameLoop(timestamp) {
+            let dt = (timestamp - lastTime) / 1000;
+            if (isNaN(dt) || dt > 0.1) dt = 0.016;
+            lastTime = timestamp;
+
+            update(dt);
+            draw();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update(dt) {
+            if (gameState !== "PLAYING") return;
+
+            const currentLvl = levels[currentLevelIndex];
+            const previousY = player.y;
+            const isMoving = keys["ArrowRight"] || keys["KeyD"] || keys["ArrowLeft"] || keys["KeyA"];
+
+            if (player.isGrounded) {
+                if (isMoving) {
+                    player.animationTimer += dt;
+                    if (player.animationTimer >= player.frameDuration) {
+                        player.animationTimer = 0;
+                        player.frame = (player.frame + 1) % playerSprites.length;
+                    }
+                } else {
+                    player.frame = 0;
+                    player.animationTimer = 0;
+                }
+            } else {
+                player.frame = 2;
+                player.animationTimer = 0;
+            }
+
+            if (keys["ArrowRight"] || keys["KeyD"]) {
+                player.x += player.speed * dt;
+            } else if (keys["ArrowLeft"] || keys["KeyA"]) {
+                player.x -= player.speed * dt;
+            }
+
+            player.yVelocity += gravity * dt;
+            player.y += player.yVelocity * dt;
+
+            player.isGrounded = false;
+            for (let plat of currentLvl.platforms) {
+                if (checkCollision(player, plat)) {
+                    if (player.yVelocity >= 0 && previousY + player.height <= plat.y + 12) {
+                        player.y = plat.y - player.height;
+                        player.yVelocity = 0;
+                        player.isGrounded = true;
+                    }
+                }
+            }
+
+            for (let item of currentLvl.items) {
+                if (!item.collected && checkCollision(player, item)) {
+                    item.collected = true;
+                    score += 100;
+                }
+            }
+
+            for (let hazard of currentLvl.hazards) {
+                if (checkCollision(player, hazard)) {
+                    loadLevel(currentLevelIndex);
+                    return;
+                }
+            }
+
+            if (player.y > 700) {
+                loadLevel(currentLevelIndex);
+            }
+
+            cameraX = player.x - 200;
+
+            if (checkCollision(player, currentLvl.goal)) {
+                if (currentLevelIndex < levels.length - 1) {
+                    currentLevelIndex++;
+                    loadLevel(currentLevelIndex);
+                } else {
+                    gameState = "VICTORY";
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const currentLvl = levels[currentLevelIndex];
+
+            if (gameState === "STORY") {
+                ctx.fillStyle = "#ffcc66";
+                ctx.font = "bold 22px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(currentLvl.title, 400, 180);
+
+                ctx.fillStyle = "#e0e0e0";
+                ctx.font = "16px sans-serif";
+                const lines = currentLvl.story.split('\n');
+                lines.forEach((line, i) => {
+                    ctx.fillText(line, 400, 260 + (i * 25));
+                });
+
+            } else if (gameState === "PLAYING") {
+                ctx.save();
+                ctx.translate(-cameraX, 0);
+
+                ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+                bgStars.forEach(star => {
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                currentLvl.platforms.forEach(plat => {
+                    ctx.fillStyle = "rgba(51, 153, 230, 0.8)";
+                    ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "12px sans-serif";
+                    ctx.textAlign = "left";
+                    ctx.fillText(plat.name, plat.x + 5, plat.y - 8);
+                });
+
+                currentLvl.items.forEach(item => {
+                    if (!item.collected) {
+                        ctx.fillStyle = "#ffd700";
+                        ctx.fillRect(item.x, item.y, item.width, item.height);
+                    }
+                });
+
+                currentLvl.hazards.forEach(hazard => {
+                    ctx.fillStyle = "#e63946";
+                    ctx.fillRect(hazard.x, hazard.y, hazard.width, hazard.height);
+                });
+
+                ctx.strokeStyle = "#4cc9f0";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(currentLvl.goal.x, currentLvl.goal.y, currentLvl.goal.width, currentLvl.goal.height);
+                ctx.fillStyle = "#4cc9f0";
+                ctx.font = "12px sans-serif";
+                ctx.fillText("Meta", currentLvl.goal.x, currentLvl.goal.y - 8);
+
+                const playerSprite = playerSprites[player.frame];
+                if (playerSprite.complete && playerSprite.naturalWidth > 0) {
+                    ctx.drawImage(playerSprite, player.x, player.y, player.width, player.height);
+                } else {
+                    ctx.fillStyle = "#e67e22";
+                    ctx.fillRect(player.x, player.y, player.width, player.height);
+                }
+
+                ctx.restore();
+
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "14px sans-serif";
+                ctx.textAlign = "left";
+                ctx.fillText(`${currentLvl.title} | Puntaje: ${score}`, 15, 25);
+
+            } else if (gameState === "VICTORY") {
+                ctx.fillStyle = "#ffcc66";
+                ctx.font = "bold 26px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("¡COMPLETASTE LA HISTORIA!", 400, 220);
+
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "18px sans-serif";
+                ctx.fillText(`Puntaje Final: ${score}`, 400, 270);
+
+                ctx.fillStyle = "#4cc9f0";
+                ctx.font = "16px sans-serif";
+                ctx.fillText("[ Presiona 'R' o ESPACIO para volver a jugar ]", 400, 340);
+            }
+        }
+
+        loadLevel(0);
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>

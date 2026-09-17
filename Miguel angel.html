@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Nauoxo — Wallpaper</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#080a1a;
+    --sky-mid:#141336;
+    --sky-low:#2a1f4d;
+    --horizon:#4a2f4f;
+    --star:#f4f1de;
+    --code:#8fd6ff;
+    --code-dim:#4a6b8a;
+    --amber:#f0b56b;
+    --nandu:#0b0a12;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{
+    width:100%;height:100%;
+    overflow:hidden;
+    background:var(--sky-top);
+    font-family:'JetBrains Mono',monospace;
+  }
+  #stage{
+    position:relative;
+    width:100vw;height:100vh;
+    background:
+      radial-gradient(ellipse 120% 70% at 50% 100%, var(--horizon) 0%, transparent 60%),
+      linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 45%, var(--sky-low) 78%, var(--horizon) 100%);
+  }
+
+  /* fine dust stars */
+  #dust{
+    position:absolute; inset:-2vw;
+    will-change: transform;
+    contain: layout paint;
+  }
+  .dust-star{
+    position:absolute;
+    background:var(--star);
+    border-radius:50%;
+    animation: twinkle linear infinite;
+    opacity:.6;
+    will-change: opacity;
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:.15;}
+    50%{opacity:.85;}
+  }
+
+  /* constellation layer */
+  #constellations{ position:absolute; inset:0; will-change: transform; contain: layout paint; }
+  .const-line{
+    stroke:var(--code-dim);
+    stroke-width:1;
+    opacity:.3;
+    animation: line-pulse 6s ease-in-out infinite;
+  }
+  @keyframes line-pulse{
+    0%,100%{ opacity:.18; }
+    50%{ opacity:.42; }
+  }
+  .code-star{
+    position:absolute;
+    color:var(--code);
+    font-weight:500;
+    text-shadow:0 0 6px var(--code), 0 0 14px rgba(143,214,255,.5);
+    animation: pulse-code 5s ease-in-out infinite, float-code 7s ease-in-out infinite;
+    user-select:none;
+    white-space:nowrap;
+  }
+  @keyframes pulse-code{
+    0%,100%{ text-shadow:0 0 4px var(--code), 0 0 8px rgba(143,214,255,.35); opacity:.75;}
+    50%{ text-shadow:0 0 10px var(--code), 0 0 22px rgba(143,214,255,.7); opacity:1;}
+  }
+  @keyframes float-code{
+    0%,100%{ margin-top:0px; }
+    50%{ margin-top:-6px; }
+  }
+
+  /* shooting stars */
+  .shooting{
+    position:absolute;
+    width:2px;height:2px;
+    background:var(--star);
+    border-radius:50%;
+    box-shadow:0 0 6px 1px var(--star);
+    opacity:0;
+  }
+  @keyframes shoot{
+    0%{ transform:translate(0,0); opacity:0; }
+    5%{ opacity:1; }
+    18%{ opacity:0; }
+    100%{ transform:translate(-420px,220px); opacity:0; }
+  }
+  .shooting::after{
+    content:'';
+    position:absolute;
+    top:1px; left:1px;
+    width:130px; height:1px;
+    background:linear-gradient(90deg, rgba(244,241,222,.9), transparent);
+    transform-origin:left center;
+    transform:rotate(207deg);
+  }
+
+  /* ñandú silhouette */
+  #nandu-wrap{
+    position:absolute;
+    left:50%; bottom:1.6vh;
+    transform:translateX(-50%);
+    width:min(40vw, 480px);
+    animation: sway 10s ease-in-out infinite;
+    transform-origin: 55% 100%;
+    will-change: transform;
+  }
+  @keyframes sway{
+    0%,100%{ transform:translateX(-50%) rotate(0deg); }
+    50%{ transform:translateX(-50%) rotate(0.4deg); }
+  }
+  #nandu-svg{ overflow:visible; }
+  #nandu-svg .fill{ fill:var(--nandu); }
+  #nandu-svg .rim{ fill:none; stroke:var(--amber); stroke-width:1.2; opacity:.25; }
+
+  #body-group{
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: breathe 4.5s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ transform:scale(1,1); }
+    50%{ transform:scale(1.012,0.985); }
+  }
+
+  #legs-group{
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: weight-shift 6s ease-in-out infinite;
+  }
+  @keyframes weight-shift{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(1.2px); }
+  }
+
+  #grass{
+    position:absolute; left:0; right:0; bottom:0; height:6vh;
+    background:var(--nandu);
+    clip-path: polygon(
+      0% 100%, 0% 40%, 3% 55%, 6% 30%, 9% 60%, 13% 25%, 17% 58%, 21% 35%,
+      25% 62%, 29% 20%, 33% 55%, 37% 40%, 41% 65%, 45% 30%, 49% 58%,
+      53% 42%, 57% 20%, 61% 60%, 65% 35%, 69% 55%, 73% 25%, 77% 62%,
+      81% 38%, 85% 58%, 89% 22%, 93% 55%, 97% 32%, 100% 60%, 100% 100%
+    );
+    transform-origin: 50% 100%;
+    animation: grass-sway 5s ease-in-out infinite;
+  }
+  @keyframes grass-sway{
+    0%,100%{ transform:skewX(0deg); }
+    50%{ transform:skewX(0.6deg); }
+  }
+
+  #tag{
+    position:absolute;
+    left:28px; bottom:22px;
+    color:var(--star);
+    opacity:.55;
+    font-size:13px;
+  }
+  #tag .comment{ color:var(--code-dim); }
+  #tag .name{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:var(--star);
+    opacity:.9;
+  }
+  #tag .subtag{
+    margin-top:2px;
+    font-size:11.5px;
+    color:var(--star);
+    opacity:.65;
+  }
+  #tag .sub{
+    display:block;
+    margin-top:2px;
+    font-size:12px;
+    color:var(--code-dim);
+    opacity:.85;
+  }
+
+  #moon{
+    position:absolute;
+    top:9vh; right:12vw;
+    width:70px; height:70px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #fff8e6, var(--amber) 70%);
+    box-shadow:0 0 40px 10px rgba(240,181,107,.25), 0 0 90px 30px rgba(240,181,107,.08);
+    animation: moon-glow 8s ease-in-out infinite;
+  }
+  @keyframes moon-glow{
+    0%,100%{ box-shadow:0 0 40px 10px rgba(240,181,107,.25), 0 0 90px 30px rgba(240,181,107,.08); }
+    50%{ box-shadow:0 0 55px 16px rgba(240,181,107,.35), 0 0 120px 40px rgba(240,181,107,.14); }
+  }
+
+  /* bird flock */
+  #birds{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+  .bird{
+    position:absolute;
+    opacity:.5;
+    will-change: transform;
+  }
+  .bird svg{ display:block; overflow:visible; }
+  .bird path{ stroke:var(--nandu); stroke-width:2.2; fill:none; stroke-linecap:round; }
+  .bird .wing-l{ transform-box:fill-box; transform-origin:100% 50%; animation:flap .7s ease-in-out infinite; }
+  .bird .wing-r{ transform-box:fill-box; transform-origin:0% 50%; animation:flap .7s ease-in-out infinite; }
+  @keyframes flap{
+    0%,100%{ transform:rotate(0deg); }
+    50%{ transform:rotate(-22deg); }
+  }
+  @keyframes fly-across{
+    from{ transform:translateX(-60px); }
+    to{ transform:translateX(calc(100vw + 60px)); }
+  }
+
+  /* floating terminal panel */
+  #terminal{
+    position:absolute;
+    top:26px; right:26px;
+    width:250px;
+    background:rgba(10,12,28,.55);
+    border:1px solid rgba(143,214,255,.18);
+    border-radius:8px;
+    padding:12px 14px;
+    backdrop-filter:blur(2px);
+    box-shadow:0 0 30px rgba(0,0,0,.25);
+    animation: term-float 6s ease-in-out infinite;
+  }
+  @keyframes term-float{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-5px); }
+  }
+  #terminal .dots{ display:flex; gap:5px; margin-bottom:9px; }
+  #terminal .dots span{ width:8px; height:8px; border-radius:50%; display:inline-block; opacity:.5; }
+  #terminal .dots span:nth-child(1){ background:#ff8a80; }
+  #terminal .dots span:nth-child(2){ background:#ffd980; }
+  #terminal .dots span:nth-child(3){ background:#9dffb0; }
+  #terminal .line{
+    font-size:11.5px;
+    color:var(--code);
+    opacity:.8;
+    min-height:15px;
+    line-height:1.7;
+    white-space:pre;
+  }
+  #terminal .cursor{
+    display:inline-block;
+    width:6px; height:12px;
+    background:var(--code);
+    margin-left:2px;
+    vertical-align:middle;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  /* binary rain, sparse and dim */
+  #rain{ position:absolute; inset:0; overflow:hidden; pointer-events:none; contain: layout paint; }
+  .bit{
+    position:absolute;
+    will-change: transform;
+    top:-20px;
+    color:var(--code-dim);
+    font-size:12px;
+    opacity:.28;
+    animation: fall linear infinite;
+  }
+  @keyframes fall{
+    to{ transform:translateY(112vh); }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="moon"></div>
+  <div id="dust"></div>
+  <svg id="constellations" width="100%" height="100%"></svg>
+  <div id="rain"></div>
+  <div id="birds"></div>
+  <div id="grass"></div>
+
+  <div id="terminal">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="line" id="term-line"><span class="cursor"></span></div>
+  </div>
+
+  <div id="nandu-wrap">
+    <svg id="nandu-svg" viewBox="0 0 320 420" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- legs -->
+      <g id="legs-group">
+        <path class="fill" d="M146,296 C141,320 136,342 138,398 L146,398 C147,342 152,320 156,297 Z"/>
+        <!-- back leg, lifted mid-stride -->
+        <path class="fill" d="M178,300 C183,320 189,336 187,362 L193,362 C196,338 190,320 186,299 Z"/>
+        <!-- feet -->
+        <path class="fill" d="M138,398 L124,412 L134,401 L138,414 L142,401 L148,412 L142,398 Z"/>
+        <path class="fill" d="M187,362 L173,376 L183,365 L187,378 L191,365 L197,376 L191,362 Z"/>
+      </g>
+
+      <!-- body + feather texture + tail feathers -->
+      <g id="body-group">
+        <ellipse class="fill" cx="164" cy="228" rx="60" ry="82" transform="rotate(6 164 228)"/>
+        <ellipse class="rim" cx="164" cy="228" rx="60" ry="82" transform="rotate(6 164 228)"/>
+
+        <g id="body-texture" stroke="var(--amber)" stroke-width="1.3" fill="none" opacity=".16" stroke-linecap="round">
+          <path d="M126,170 Q132,164 138,170"/>
+          <path d="M146,164 Q152,157 158,164"/>
+          <path d="M166,162 Q172,156 178,162"/>
+          <path d="M118,192 Q125,185 132,192"/>
+          <path d="M140,186 Q147,178 154,186"/>
+          <path d="M162,184 Q169,177 176,184"/>
+          <path d="M184,188 Q190,181 196,188"/>
+          <path d="M112,216 Q120,208 128,216"/>
+          <path d="M136,209 Q144,201 152,209"/>
+          <path d="M160,207 Q168,199 176,207"/>
+          <path d="M184,211 Q191,203 198,211"/>
+          <path d="M114,242 Q122,234 130,242"/>
+          <path d="M138,236 Q146,228 154,236"/>
+          <path d="M162,235 Q170,227 178,235"/>
+          <path d="M184,239 Q191,231 198,239"/>
+          <path d="M122,266 Q129,259 136,266"/>
+          <path d="M146,262 Q153,254 160,262"/>
+          <path d="M168,261 Q175,253 182,261"/>
+          <path d="M134,288 Q140,282 146,288"/>
+          <path d="M154,286 Q160,280 166,286"/>
+        </g>
+
+        <g id="tail">
+          <g class="feather" transform="translate(213,183) rotate(-8)">
+            <path class="fill" d="M-7,0 C-10,-26 -6,-52 0,-74 C6,-52 10,-26 7,0 Z"/>
+          </g>
+          <g class="feather" transform="translate(216,187) rotate(-30)">
+            <path class="fill" d="M-7,0 C-10,-30 -6,-60 0,-86 C6,-60 10,-30 7,0 Z"/>
+          </g>
+          <g class="feather" transform="translate(216,193) rotate(-52)">
+            <path class="fill" d="M-7,0 C-10,-30 -6,-62 0,-90 C6,-62 10,-30 7,0 Z"/>
+          </g>
+          <g class="feather" transform="translate(212,200) rotate(-74)">
+            <path class="fill" d="M-6,0 C-9,-26 -5,-52 0,-76 C5,-52 9,-26 6,0 Z"/>
+          </g>
+          <g class="feather" transform="translate(206,206) rotate(-93)">
+            <path class="fill" d="M-6,0 C-8,-22 -5,-44 0,-64 C5,-44 8,-22 6,0 Z"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- neck + head -->
+      <g id="neck-head">
+        <path class="fill" d="M160,170 C130,150 100,120 92,66 L108,58 C120,113 148,145 190,177 Z"/>
+        <circle class="fill" cx="100" cy="50" r="17"/>
+        <path class="fill" d="M92,36 L58,8 L100,30 Z"/>
+        <circle cx="97" cy="46" r="2.4" fill="#f0b56b" opacity=".7"/>
+      </g>
+
+    </svg>
+  </div>
+
+  <div id="tag">
+    <span class="comment">// </span><span class="name">nauoxo</span>
+    <div class="subtag"><span class="comment">// </span>cacique pelayo</div>
+  </div>
+</div>
+
+<script>
+  // fine background dust stars
+  const dust = document.getElementById('dust');
+  const dustCount = 95;
+  let frag = document.createDocumentFragment();
+  for(let i=0;i<dustCount;i++){
+    const s = document.createElement('div');
+    s.className = 'dust-star';
+    const size = Math.random() < 0.85 ? 1 : 2;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.left = (Math.random()*104)+'vw';
+    s.style.top = (Math.random()*72)+'vh';
+    s.style.animationDuration = (2 + Math.random()*4)+'s';
+    s.style.animationDelay = (Math.random()*5)+'s';
+    frag.appendChild(s);
+  }
+  dust.appendChild(frag);
+
+  // constellations made of programming symbols
+  const symbols = ['{ }','< / >','01','fn','git','npm',';','=>','[ ]','#','&&','!==','λ','01101','sudo','~/','<>','++','if()',';;'];
+  const svg = document.getElementById('constellations');
+  const ns = 'http://www.w3.org/2000/svg';
+  const vw = window.innerWidth, vh = window.innerHeight;
+
+  function makeConstellation(cx, cy, spread, nPoints){
+    const pts = [];
+    for(let i=0;i<nPoints;i++){
+      const angle = (Math.PI*2/nPoints)*i + Math.random()*0.6;
+      const r = spread*(0.4+Math.random()*0.6);
+      pts.push({ x: cx + Math.cos(angle)*r, y: cy + Math.sin(angle)*r*0.6 });
+    }
+    for(let i=0;i<pts.length-1;i++){
+      const line = document.createElementNS(ns,'line');
+      line.setAttribute('x1', pts[i].x);
+      line.setAttribute('y1', pts[i].y);
+      line.setAttribute('x2', pts[i+1].x);
+      line.setAttribute('y2', pts[i+1].y);
+      line.setAttribute('class','const-line');
+      line.style.animationDelay = (Math.random()*4)+'s';
+      svg.appendChild(line);
+    }
+    pts.forEach(p=>{
+      const div = document.createElement('div');
+      div.className = 'code-star';
+      div.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+      div.style.left = p.x+'px';
+      div.style.top = p.y+'px';
+      div.style.fontSize = (11+Math.random()*6)+'px';
+      div.style.animationDelay = (Math.random()*5)+'s, '+(Math.random()*5)+'s';
+      document.getElementById('stage').appendChild(div);
+    });
+  }
+
+  makeConstellation(vw*0.18, vh*0.22, 90, 5);
+  makeConstellation(vw*0.75, vh*0.16, 100, 5);
+  makeConstellation(vw*0.42, vh*0.10, 70, 4);
+  makeConstellation(vw*0.88, vh*0.42, 80, 4);
+
+  // gentle head/neck look-around motion
+  const neckHead = document.getElementById('neck-head');
+  const neckAnim = document.createElementNS(ns,'animateTransform');
+  neckAnim.setAttribute('attributeName','transform');
+  neckAnim.setAttribute('type','rotate');
+  neckAnim.setAttribute('values','0 168 172; -5 168 172; -5 168 172; 3 168 172; 0 168 172; 0 168 172');
+  neckAnim.setAttribute('keyTimes','0; 0.18; 0.4; 0.6; 0.8; 1');
+  neckAnim.setAttribute('dur','13s');
+  neckAnim.setAttribute('repeatCount','indefinite');
+  neckAnim.setAttribute('calcMode','spline');
+  neckAnim.setAttribute('keySplines','.4 0 .6 1; .4 0 .6 1; .4 0 .6 1; .4 0 .6 1; .4 0 .6 1');
+  neckHead.appendChild(neckAnim);
+
+  // feathers swaying, each with its own timing
+  document.querySelectorAll('.feather').forEach((f,i)=>{
+    const base = f.getAttribute('transform');
+    const match = base.match(/translate\(([^,]+),([^)]+)\) rotate\(([^)]+)\)/);
+    const tx = match[1], ty = match[2], rot = parseFloat(match[3]);
+    const anim = document.createElementNS(ns,'animateTransform');
+    anim.setAttribute('attributeName','transform');
+    anim.setAttribute('type','rotate');
+    anim.setAttribute('additive','sum');
+    anim.setAttribute('values', `0 ${tx} ${ty}; ${2.5+Math.random()*2} ${tx} ${ty}; 0 ${tx} ${ty}; -${1.5+Math.random()} ${tx} ${ty}; 0 ${tx} ${ty}`);
+    anim.setAttribute('dur', (4+Math.random()*3)+'s');
+    anim.setAttribute('begin', (Math.random()*3)+'s');
+    anim.setAttribute('repeatCount','indefinite');
+    f.appendChild(anim);
+  });
+
+  // occasional shooting stars
+  function launchShootingStar(){
+    const star = document.createElement('div');
+    star.className = 'shooting';
+    star.style.left = (Math.random()*60+30)+'vw';
+    star.style.top = (Math.random()*20+5)+'vh';
+    star.style.animation = 'shoot 1.4s ease-out forwards';
+    document.getElementById('stage').appendChild(star);
+    setTimeout(()=>star.remove(), 1600);
+  }
+  setInterval(()=>{ if(Math.random() < 0.7) launchShootingStar(); }, 4200);
+  launchShootingStar();
+
+  // bird flock, crossing the sky occasionally
+  function launchBird(){
+    const wrap = document.createElement('div');
+    wrap.className = 'bird';
+    const scale = 0.6 + Math.random()*0.8;
+    const top = (8 + Math.random()*30);
+    const dur = 16 + Math.random()*14;
+    wrap.style.top = top+'vh';
+    wrap.style.left = '0px';
+    wrap.style.opacity = (0.3 + Math.random()*0.35).toFixed(2);
+    wrap.style.transform = `scale(${scale})`;
+    wrap.style.animation = `fly-across ${dur}s linear forwards`;
+    wrap.innerHTML = `<svg width="24" height="14" viewBox="0 0 24 14">
+      <path class="wing-l" d="M12,7 C8,7 4,2 0,4"/>
+      <path class="wing-r" d="M12,7 C16,7 20,2 24,4"/>
+    </svg>`;
+    document.getElementById('birds').appendChild(wrap);
+    setTimeout(()=>wrap.remove(), dur*1000+500);
+  }
+  function launchFlock(){
+    const n = 2 + Math.floor(Math.random()*2);
+    for(let i=0;i<n;i++){
+      setTimeout(()=>launchBird(), i*280);
+    }
+  }
+  setInterval(()=>{ if(Math.random()<0.5) launchFlock(); }, 13000);
+  setTimeout(launchFlock, 3000);
+
+  // floating terminal, typewriter loop
+  const termLines = [
+    'const cielo = new Noche();',
+    'ñandu.mirar(estrellas);',
+    'git commit -m "nauoxo"',
+    'while (fiesta) { bailar(); }',
+    'npm run stand -- --vibe=alto',
+    'sudo abrazar --a=todes',
+    'if (sedienta) traerFernet();',
+    'console.log("bienvenidos");'
+  ];
+  const termEl = document.getElementById('term-line');
+  let li = 0;
+  function typeLine(){
+    const text = termLines[li % termLines.length];
+    let ci = 0;
+    termEl.innerHTML = '<span class="cursor"></span>';
+    const typer = setInterval(()=>{
+      ci++;
+      termEl.innerHTML = text.slice(0,ci) + '<span class="cursor"></span>';
+      if(ci >= text.length){
+        clearInterval(typer);
+        setTimeout(()=>{ li++; typeLine(); }, 1800);
+      }
+    }, 55);
+  }
+  typeLine();
+
+  // sparse binary rain
+  const rain = document.getElementById('rain');
+  const rainCols = 9;
+  for(let i=0;i<rainCols;i++){
+    const bit = document.createElement('div');
+    bit.className = 'bit';
+    bit.textContent = Math.random() < 0.5 ? '0' : '1';
+    bit.style.left = (Math.random()*100)+'vw';
+    bit.style.animationDuration = (14 + Math.random()*12)+'s';
+    bit.style.animationDelay = (Math.random()*14)+'s';
+    rain.appendChild(bit);
+  }
+
+  // slow autonomous drift + subtle mouse parallax on stars and constellations
+  const dustLayer = document.getElementById('dust');
+  const constLayer = document.getElementById('constellations');
+  let mx = 0, my = 0;
+  document.addEventListener('mousemove', (e)=>{
+    mx = (e.clientX / window.innerWidth - 0.5);
+    my = (e.clientY / window.innerHeight - 0.5);
+  });
+  function parallaxLoop(t){
+    const driftX = Math.sin(t/40000) * 14;
+    const driftY = Math.cos(t/50000) * 8;
+    dustLayer.style.transform = `translate(${driftX + mx*10}px, ${driftY + my*6}px)`;
+    constLayer.style.transform = `translate(${driftX*1.4 + mx*16}px, ${driftY*1.4 + my*9}px)`;
+    requestAnimationFrame(parallaxLoop);
+  }
+  requestAnimationFrame(parallaxLoop);
+</script>
+</body>
+</html>

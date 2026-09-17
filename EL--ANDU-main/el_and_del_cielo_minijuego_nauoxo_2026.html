@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>El Ñandú del Cielo | Nauoxo 2026</title>
+
+  <!-- Tipografías oficiales del proyecto Nauoxo 2026: Fraunces y DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --forest-800: #183f2e;
+      --forest-900: #0f291e;
+      --clay-600: #9e4331;
+      --sun-500: #e5a732;
+      --sun-400: #f3c25b;
+      --river-500: #49869e;
+      --night-900: #040810;
+      --sand-50: #fcf8f0;
+      --ink-900: #1a2420;
+
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none; /* Previene scroll no deseado en mobile */
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--night-900);
+      color: var(--sand-50);
+      font-family: var(--font-sans);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      height: 100%;
+      max-height: 880px;
+      background: linear-gradient(180deg, var(--night-900) 0%, #081711 50%, var(--forest-900) 100%);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.9);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Pantallas de interfaz de usuario (Overlay) */
+    .ui-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 28px 24px;
+      background: rgba(4, 8, 16, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+      text-align: center;
+      overflow-y: auto;
+    }
+
+    .ui-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Tags y Títulos */
+    .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--sun-400);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    h1, h2 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      color: var(--sand-50);
+      line-height: 1.2;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 10px rgba(229, 167, 50, 0.3);
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+    }
+
+    p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: rgba(252, 248, 240, 0.88);
+      margin-bottom: 16px;
+    }
+
+    /* Botones con estética pill de Nauoxo */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--sun-500);
+      color: var(--ink-900);
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 14px 32px;
+      border-radius: 9999px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(229, 167, 50, 0.35);
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-decoration: none;
+      margin-top: 10px;
+    }
+
+    .btn:hover, .btn:active {
+      background-color: var(--sun-400);
+      transform: scale(1.03) translateY(-2px);
+      box-shadow: 0 6px 24px rgba(243, 194, 91, 0.5);
+    }
+
+    /* HUD Flotante durante la partida */
+    #hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 16px 20px;
+      z-index: 5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .hud-box {
+      background: rgba(4, 8, 16, 0.75);
+      border: 1px solid rgba(229, 167, 50, 0.3);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 8px 16px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-label {
+      font-size: 0.7rem;
+      color: var(--sun-400);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hud-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--sand-50);
+      font-family: var(--font-display);
+    }
+
+    .progress-bar-bg {
+      width: 90px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+      overflow: hidden;
+      border: 1px solid rgba(243, 194, 91, 0.2);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--sun-500), var(--sun-400));
+      border-radius: 9999px;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 8px var(--sun-400);
+    }
+
+    /* Botones táctiles de apoyo en mobile */
+    #mobile-controls {
+      position: absolute;
+      bottom: 16px;
+      left: 0;
+      width: 100%;
+      padding: 0 20px;
+      z-index: 5;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .touch-btn {
+      width: 60px;
+      height: 60px;
+      background: rgba(24, 63, 46, 0.7);
+      border: 2px solid rgba(229, 167, 50, 0.5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--sun-400);
+      font-size: 1.3rem;
+      pointer-events: auto;
+      backdrop-filter: blur(4px);
+      transition: transform 0.1s, background 0.15s;
+    }
+
+    .touch-btn:active {
+      background: rgba(229, 167, 50, 0.5);
+      color: var(--sand-50);
+      transform: scale(0.92);
+    }
+
+    @media (pointer: fine) {
+      #mobile-controls {
+        display: none;
+      }
+    }
+
+    .cultural-quote {
+      font-style: italic;
+      color: var(--sun-400);
+      border-left: 2px solid var(--sun-500);
+      padding-left: 14px;
+      margin: 16px 0;
+      text-align: left;
+      font-size: 0.9rem;
+      background: rgba(229, 167, 50, 0.05);
+      padding-top: 8px;
+      padding-bottom: 8px;
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* Animación de aviso o escudo activado */
+    .shield-badge {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(73, 134, 158, 0.85);
+      color: var(--sand-50);
+      padding: 4px 14px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 6;
+      border: 1px solid var(--sun-400);
+    }
+    .shield-badge.active {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  
+  <!-- Canvas principal del juego -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Banner de Escudo Celestial -->
+  <div id="shield-badge" class="shield-badge">Escudo de Luz Activado</div>
+
+  <!-- HUD del Juego -->
+  <div id="hud">
+    <div class="hud-box">
+      <span class="hud-label">Estrellas</span>
+      <span id="star-count" class="hud-value">0</span>
+    </div>
+    <div class="hud-box" style="flex-direction: column; align-items: flex-end; gap: 2px;">
+      <span class="hud-label">Constelación Qom</span>
+      <div class="progress-bar-bg">
+        <div id="constellation-progress" class="progress-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controles táctiles móviles opcionales -->
+  <div id="mobile-controls">
+    <div class="touch-btn" id="btn-left">◀</div>
+    <div class="touch-btn" id="btn-right">▶</div>
+  </div>
+
+  <!-- Pantalla de Inicio -->
+  <div id="screen-start" class="ui-overlay">
+    <div style="margin: auto 0;">
+      <span class="tag">Capítulo 03 • Astronomía Cultural Qom</span>
+      <h1>El Ñandú del Cielo</h1>
+      <p style="color: var(--sun-400); font-family: var(--font-display); font-weight: 600;">So Mañec Piguem Le'ec</p>
+      
+      <p>
+        Guiá al Gran Ñandú a través de las huellas de la Vía Láctea. Recolectá estrellas para revelar la constelación cósmica y esquivá las sombras de los jóvenes cazadores y sus perros.
+      </p>
+
+      <div class="cultural-quote">
+        "Observar el cielo es recordar el camino de la vida: exigente, sereno y compartido en comunidad."
+      </div>
+    </div>
+
+    <div>
+      <p style="font-size: 0.8rem; opacity: 0.75; margin-bottom: 10px;">
+        Deslizá el dedo sobre la pantalla o usá las flechas ◄ ► / A-D
+      </p>
+      <button class="btn" id="btn-start">Iniciar el Camino</button>
+    </div>
+  </div>
+
+  <!-- Pantalla de Cierre / Finalización -->
+  <div id="screen-end" class="ui-overlay hidden">
+    <div style="margin: auto 0;">
+      <span class="tag">Memoria del Firmamento</span>
+      <h2>¡Constelación Revelada!</h2>
+      
+      <p>
+        Has completado el trazado sagrado de <strong>So Mañec</strong> en el firmamento chaqueño, perpetuando la guía para las futuras generaciones.
+      </p>
+
+      <div class="cultural-quote" id="final-quote">
+        "Alosheguem na piguem: Mira al cielo. Las estrellas señalan el paso de las estaciones y guardan las huellas de nuestros antepasados."
+      </div>
+
+      <div style="background: rgba(24, 63, 46, 0.5); border: 1px solid rgba(229, 167, 50, 0.4); border-radius: 20px; padding: 18px; margin-top: 16px;">
+        <div style="font-size: 0.8rem; color: var(--sun-400); text-transform: uppercase; font-weight: 700;">Huellas Estelares Reunidas</div>
+        <div id="final-stars" style="font-size: 2.4rem; font-family: var(--font-display); font-weight: 700; color: var(--sand-50);">0</div>
+      </div>
+    </div>
+
+    <div>
+      <button class="btn" id="btn-restart">Volver a Recorrer el Cielo</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Estado del Juego
+const STATE = {
+  START: 'START',
+  PLAYING: 'PLAYING',
+  END: 'END'
+};
+
+let currentState = STATE.START;
+
+// Canvas y Contexto
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const container = document.getElementById('game-container');
+
+// Elementos UI
+const screenStart = document.getElementById('screen-start');
+const screenEnd = document.getElementById('screen-end');
+const starCountEl = document.getElementById('star-count');
+const constellationProgressEl = document.getElementById('constellation-progress');
+const finalStarsEl = document.getElementById('final-stars');
+const shieldBadge = document.getElementById('shield-badge');
+
+// Botones
+const btnStart = document.getElementById('btn-start');
+const btnRestart = document.getElementById('btn-restart');
+const btnLeft = document.getElementById('btn-left');
+const btnRight = document.getElementById('btn-right');
+
+// Dimensiones Adaptables
+let width = 0;
+let height = 0;
+
+function resize() {
+  width = container.clientWidth;
+  height = container.clientHeight;
+  canvas.width = width;
+  canvas.height = height;
+}
+
+window.addEventListener('resize', resize);
+resize();
+
+// Puntos fijos para ir dibujando la Constelación del Ñandú en el fondo
+const CONSTELLATION_NODES = [
+  { xRatio: 0.5, yRatio: 0.2 },  // Cabeza
+  { xRatio: 0.45, yRatio: 0.3 }, // Cuello alto
+  { xRatio: 0.4, yRatio: 0.4 },  // Cuello base
+  { xRatio: 0.35, yRatio: 0.52 },// Lomo superior
+  { xRatio: 0.5, yRatio: 0.55 }, // Centro cuerpo
+  { xRatio: 0.65, yRatio: 0.5 }, // Cola/Plumas
+  { xRatio: 0.42, yRatio: 0.68 },// Pata izquierda
+  { xRatio: 0.58, yRatio: 0.7 }  // Pata derecha
+];
+
+// Jugador: So Mañec (Gran Ñandú)
+const player = {
+  x: width / 2,
+  y: height * 0.78,
+  radius: 22,
+  targetX: width / 2,
+  speed: 9,
+  starsCollected: 0,
+  maxStars: 25,
+  shakeTime: 0,
+  animFrame: 0,
+  shieldTimer: 0 // Escudo protector temporal
+};
+
+// Colecciones del juego
+let backgroundStars = [];
+let particles = [];
+let obstacles = [];
+let collectibles = [];
+
+// Tiempos y balanceo
+let obstacleTimer = 0;
+let collectibleTimer = 0;
+let wayOffset = 0; // Animación de flujo de la Vía Láctea
+
+// Inicializar fondo cósmico
+function initBackgroundStars() {
+  backgroundStars = [];
+  for (let i = 0; i < 90; i++) {
+    backgroundStars.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      size: Math.random() * 2.2 + 0.5,
+      alpha: Math.random() * 0.85 + 0.15,
+      speed: Math.random() * 0.8 + 0.3,
+      twinkleSpeed: Math.random() * 0.04 + 0.01
+    });
+  }
+}
+
+// Teclado
+const keys = { left: false, right: false };
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = true;
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = true;
+});
+
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+});
+
+// Controles Táctiles Integrados (Drag / Tap)
+let touchLeftActive = false;
+let touchRightActive = false;
+
+btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); touchLeftActive = true; });
+btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); touchLeftActive = false; });
+btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); touchRightActive = true; });
+btnRight.addEventListener('touchend', (e) => { e.preventDefault(); touchRightActive = false; });
+
+// Deslizamiento directo con el dedo en cualquier punto del Canvas
+function handleTouchMove(e) {
+  if (currentState !== STATE.PLAYING) return;
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const touchX = touch.clientX - rect.left;
+  player.targetX = Math.max(player.radius, Math.min(width - player.radius, touchX));
+}
+
+canvas.addEventListener('touchstart', handleTouchMove, { passive: true });
+canvas.addEventListener('touchmove', handleTouchMove, { passive: true });
+
+function resetGame() {
+  player.x = width / 2;
+  player.targetX = width / 2;
+  player.starsCollected = 0;
+  player.shakeTime = 0;
+  player.animFrame = 0;
+  player.shieldTimer = 0;
+  
+  obstacles = [];
+  collectibles = [];
+  particles = [];
+  obstacleTimer = 0;
+  collectibleTimer = 0;
+  
+  shieldBadge.classList.remove('active');
+  starCountEl.textContent = '0';
+  constellationProgressEl.style.width = '0%';
+  
+  initBackgroundStars();
+}
+
+// Crear Cazador o Perro Cazador
+function spawnObstacle() {
+  const isDog = Math.random() > 0.65;
+  const currentSpeed = 2.8 + (player.starsCollected / player.maxStars) * 2.0; // Incremento progresivo
+  
+  obstacles.push({
+    x: Math.random() * (width - 70) + 35,
+    y: -40,
+    radius: isDog ? 16 : 22,
+    type: isDog ? 'dog' : 'hunter',
+    speed: currentSpeed + (Math.random() * 0.8),
+    angle: Math.random() * Math.PI * 2
+  });
+}
+
+// Crear Estrella o Ítem Especial
+function spawnCollectible() {
+  const isSpecial = Math.random() < 0.18; // 18% probabilidad de Estrella de Luz
+  collectibles.push({
+    x: Math.random() * (width - 60) + 30,
+    y: -20,
+    radius: isSpecial ? 15 : 12,
+    type: isSpecial ? 'shield' : 'star',
+    speed: Math.random() * 1.2 + 2.2,
+    pulse: Math.random() * Math.PI
+  });
+}
+
+// Crear Partículas de luz o polvo
+function createParticles(x, y, color, count = 10, speedMult = 1) {
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = (Math.random() * 3.5 + 1) * speedMult;
+    particles.push({
+      x: x,
+      y: y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      radius: Math.random() * 3 + 1,
+      color: color,
+      life: 1.0,
+      decay: Math.random() * 0.035 + 0.02
+    });
+  }
+}
+
+function update() {
+  if (currentState !== STATE.PLAYING) return;
+
+  // Animación del movimiento del cuerpo del Ñandú
+  player.animFrame += 0.15;
+
+  // Movimiento teclado / botones
+  if (keys.left || touchLeftActive) player.targetX -= player.speed;
+  if (keys.right || touchRightActive) player.targetX += player.speed;
+
+  player.targetX = Math.max(player.radius, Math.min(width - player.radius, player.targetX));
+  player.x += (player.targetX - player.x) * 0.22;
+
+  // Tiempo del escudo
+  if (player.shieldTimer > 0) {
+    player.shieldTimer--;
+    if (player.shieldTimer === 0) {
+      shieldBadge.classList.remove('active');
+    }
+  }
+
+  // Tiempos de sacudida visual por impacto
+  if (player.shakeTime > 0) player.shakeTime--;
+
+  // Flujo del camino estelar
+  wayOffset += 1.2;
+
+  // Fondo de estrellas centelleantes
+  backgroundStars.forEach(star => {
+    star.y += star.speed;
+    star.alpha += Math.sin(star.twinkleSpeed) * 0.02;
+    if (star.y > height) {
+      star.y = 0;
+      star.x = Math.random() * width;
+    }
+  });
+
+  // Frecuencia de spawner
+  obstacleTimer++;
+  if (obstacleTimer >= Math.max(45, 80 - Math.floor(player.starsCollected * 1.2))) {
+    spawnObstacle();
+    obstacleTimer = 0;
+  }
+
+  collectibleTimer++;
+  if (collectibleTimer >= 40) {
+    spawnCollectible();
+    collectibleTimer = 0;
+  }
+
+  // Actualizar Obstáculos
+  for (let i = obstacles.length - 1; i >= 0; i--) {
+    const obs = obstacles[i];
+    obs.y += obs.speed;
+
+    // Colisión con Ñandú
+    const dist = Math.hypot(player.x - obs.x, player.y - obs.y);
+    if (dist < player.radius + obs.radius) {
+      if (player.shieldTimer > 0) {
+        // Escudo repele el obstáculo
+        createParticles(obs.x, obs.y, '#49869e', 14, 1.5);
+      } else {
+        // Interacción sutil sin eliminar juego: desaceleración/partículas de tierra
+        createParticles(obs.x, obs.y, '#9e4331', 12);
+        player.shakeTime = 14;
+      }
+      obstacles.splice(i, 1);
+      continue;
+    }
+
+    if (obs.y > height + 60) obstacles.splice(i, 1);
+  }
+
+  // Actualizar Recolectables
+  for (let i = collectibles.length - 1; i >= 0; i--) {
+    const item = collectibles[i];
+    item.y += item.speed;
+    item.pulse += 0.08;
+
+    const dist = Math.hypot(player.x - item.x, player.y - item.y);
+    if (dist < player.radius + item.radius + 6) {
+      if (item.type === 'shield') {
+        player.shieldTimer = 300; // ~5 segundos de escudo
+        shieldBadge.classList.add('active');
+        createParticles(item.x, item.y, '#49869e', 16);
+      } else {
+        player.starsCollected++;
+        starCountEl.textContent = player.starsCollected;
+
+        const progressPct = Math.min(100, (player.starsCollected / player.maxStars) * 100);
+        constellationProgressEl.style.width = `${progressPct}%`;
+
+        createParticles(item.x, item.y, '#f3c25b', 14);
+      }
+
+      collectibles.splice(i, 1);
+
+      if (player.starsCollected >= player.maxStars) {
+        setTimeout(endGame, 350);
+      }
+      continue;
+    }
+
+    if (item.y > height + 60) collectibles.splice(i, 1);
+  }
+
+  // Partículas
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= p.decay;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, width, height);
+
+  ctx.save();
+  if (player.shakeTime > 0) {
+    const offsetX = (Math.random() - 0.5) * 8;
+    const offsetY = (Math.random() - 0.5) * 8;
+    ctx.translate(offsetX, offsetY);
+  }
+
+  // 1. Río de la Vía Láctea (Camino del Mañec) animado
+  const grad = ctx.createLinearGradient(width / 2, 0, width / 2, height);
+  grad.addColorStop(0, 'rgba(73, 134, 158, 0.12)');
+  grad.addColorStop(0.5, 'rgba(24, 63, 46, 0.22)');
+  grad.addColorStop(1, 'rgba(4, 8, 16, 0.1)');
+
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  const shift = Math.sin(wayOffset * 0.02) * 20;
+  ctx.moveTo(width * 0.15 + shift, 0);
+  ctx.bezierCurveTo(width * 0.45 - shift, height * 0.35, width * 0.05 + shift, height * 0.65, width * 0.25, height);
+  ctx.lineTo(width * 0.85, height);
+  ctx.bezierCurveTo(width * 0.65 + shift, height * 0.65, width * 0.95 - shift, height * 0.35, width * 0.75 + shift, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  // 2. Trazado progresivo de la Constelación en el fondo
+  const revealedNodesCount = Math.floor((player.starsCollected / player.maxStars) * CONSTELLATION_NODES.length);
+  if (revealedNodesCount > 0) {
+    ctx.strokeStyle = 'rgba(243, 194, 91, 0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < revealedNodesCount; i++) {
+      const node = CONSTELLATION_NODES[i];
+      const nx = node.xRatio * width;
+      const ny = node.yRatio * height;
+      if (i === 0) ctx.moveTo(nx, ny);
+      else ctx.lineTo(nx, ny);
+    }
+    ctx.stroke();
+
+    for (let i = 0; i < revealedNodesCount; i++) {
+      const node = CONSTELLATION_NODES[i];
+      ctx.fillStyle = '#f3c25b';
+      ctx.shadowColor = '#e5a732';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(node.xRatio * width, node.yRatio * height, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  // 3. Estrellas de fondo
+  backgroundStars.forEach(star => {
+    ctx.fillStyle = `rgba(252, 248, 240, ${Math.max(0.1, star.alpha)})`;
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // 4. Recolectables
+  collectibles.forEach(item => {
+    ctx.save();
+    ctx.translate(item.x, item.y);
+    const scale = 1 + Math.sin(item.pulse) * 0.18;
+    ctx.scale(scale, scale);
+
+    if (item.type === 'shield') {
+      // Escudo Estelar (Estrella Azul Celeste)
+      ctx.shadowColor = '#49869e';
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = '#49869e';
+      ctx.beginPath();
+      ctx.arc(0, 0, item.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#fcf8f0';
+      ctx.beginPath();
+      ctx.arc(0, 0, item.radius * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // Estrella Dorada Nauoxo
+      ctx.shadowColor = '#e5a732';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#f3c25b';
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) {
+        ctx.lineTo(Math.cos((i * Math.PI) / 2) * item.radius, Math.sin((i * Math.PI) / 2) * item.radius);
+        ctx.lineTo(Math.cos((i * Math.PI) / 2 + Math.PI / 4) * (item.radius * 0.38), Math.sin((i * Math.PI) / 2 + Math.PI / 4) * (item.radius * 0.38));
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  });
+
+  // 5. Obstáculos (Siluetas Vectoriales)
+  obstacles.forEach(obs => {
+    ctx.save();
+    ctx.translate(obs.x, obs.y);
+
+    ctx.fillStyle = '#9e4331';
+    ctx.strokeStyle = '#9e4331';
+
+    if (obs.type === 'hunter') {
+      // Cazador con Lanza
+      ctx.beginPath();
+      ctx.arc(0, -14, 6, 0, Math.PI * 2); // Cabeza
+      ctx.moveTo(-9, 12); ctx.lineTo(0, -5); ctx.lineTo(9, 12); // Cuerpo
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(-12, -18); ctx.lineTo(14, 18); // Lanza
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+    } else {
+      // Perro Cazador
+      ctx.beginPath();
+      ctx.ellipse(0, 2, 13, 7, 0, 0, Math.PI * 2);
+      ctx.arc(8, -4, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  });
+
+  // 6. Ñandú Cósmico (Jugador)
+  if (currentState === STATE.PLAYING) {
+    ctx.save();
+    ctx.translate(player.x, player.y);
+
+    // Halo de Escudo si está activo
+    if (player.shieldTimer > 0) {
+      ctx.strokeStyle = '#49869e';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = '#49869e';
+      ctx.shadowBlur = 16;
+      ctx.beginPath();
+      ctx.arc(0, -4, player.radius + 10, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    ctx.shadowColor = '#f3c25b';
+    ctx.shadowBlur = 16;
+    ctx.fillStyle = '#f3c25b';
+    ctx.strokeStyle = '#f3c25b';
+
+    // Animación de patas corriendo
+    const legOffset = Math.sin(player.animFrame * 2) * 8;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-4, 8); ctx.lineTo(-8 + legOffset, 22);
+    ctx.moveTo(4, 8);  ctx.lineTo(8 - legOffset, 22);
+    ctx.stroke();
+
+    // Cuerpo estilizado
+    ctx.beginPath();
+    ctx.ellipse(0, 2, 18, 13, -0.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cuello curvo y Cabeza
+    ctx.beginPath();
+    ctx.moveTo(-4, -2);
+    ctx.quadraticCurveTo(-10, -18, -4, -26);
+    ctx.lineWidth = 5;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(-4, -26, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Plumas del lomo
+    ctx.fillStyle = '#e5a732';
+    ctx.beginPath();
+    ctx.arc(8, -2, 9, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 7. Partículas
+  particles.forEach(p => {
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.life;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+  });
+
+  ctx.restore();
+}
+
+function startGame() {
+  currentState = STATE.PLAYING;
+  screenStart.classList.add('hidden');
+  screenEnd.classList.add('hidden');
+  resetGame();
+}
+
+function endGame() {
+  currentState = STATE.END;
+  finalStarsEl.textContent = player.starsCollected;
+
+  const quotes = [
+    '"Alosheguem na piguem: Mira al cielo. Las estrellas señalan el paso de las estaciones y guardan las huellas de nuestros antepasados."',
+    '"El Camino del Mañec es la guía en la noche chaqueña y metáfora de la vida en comunidad."',
+    '"Recordar el firmamento es transmitir la sabiduría de generación en generación."'
+  ];
+  document.getElementById('final-quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
+
+  screenEnd.classList.remove('hidden');
+}
+
+// Eventos de botones
+btnStart.addEventListener('click', startGame);
+btnRestart.addEventListener('click', startGame);
+
+// Game Loop
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+window.onload = function() {
+  initBackgroundStars();
+  requestAnimationFrame(gameLoop);
+};
+</script>
+
+</body>
+</html>

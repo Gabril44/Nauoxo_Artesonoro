@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NAUOXO — El Ñandú del Cielo</title>
+  <style>
+    :root { --cyan:#75e8ff; --gold:#ffe59a; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; width:100%; height:100%; overflow:hidden; background:#05081c; }
+    body { color:#f5f0d0; font-family:"Segoe UI",Arial,sans-serif; }
+    .cosmos { position:fixed; inset:0; isolation:isolate; overflow:hidden; background:radial-gradient(circle at 53% 52%,rgba(83,49,146,.38),transparent 43%),radial-gradient(circle at 5% 90%,rgba(7,118,148,.25),transparent 32%),linear-gradient(145deg,#030515,#0a0c2b 48%,#120829); }
+    .cosmos:after { content:""; position:absolute; inset:0; z-index:20; pointer-events:none; background:radial-gradient(ellipse at center,transparent 45%,rgba(1,2,10,.72)); }
+    .aurora { position:absolute; width:70vw; height:70vw; border-radius:50%; filter:blur(90px); opacity:.16; animation:breathe 9s ease-in-out infinite alternate; }
+    .a1 { left:-25vw; top:-35vw; background:#366cff; }
+    .a2 { right:-30vw; bottom:-42vw; background:#b13aff; animation-delay:-4s; }
+    .star { position:absolute; z-index:1; border-radius:50%; background:white; box-shadow:0 0 10px 2px rgba(154,222,255,.62); animation:twinkle 3.6s ease-in-out infinite; }
+    .constellations { position:absolute; inset:0; z-index:2; width:100%; height:100%; opacity:.48; }
+    .constellations path { fill:none; stroke:#7ddfff; stroke-width:1; stroke-dasharray:5 9; }
+    .constellations circle { fill:#fffbd1; filter:drop-shadow(0 0 7px #8bdcff); }
+    .constellations g { transform-origin:center; animation:drift 14s ease-in-out infinite alternate; }
+    .code { position:absolute; z-index:3; color:rgba(154,232,255,.44); font:500 clamp(.65rem,.92vw,.95rem)/1 Consolas,monospace; white-space:nowrap; animation:codeFloat 16s ease-in-out infinite; }
+    .code:before { content:"< "; color:rgba(255,229,154,.55); }
+    .title { position:absolute; z-index:8; left:8vw; top:38%; transform:translateY(-50%); text-transform:uppercase; }
+    .title p { margin:0 0 .2rem; color:var(--cyan); font:600 clamp(.72rem,1vw,1rem)/1.2 Consolas,monospace; letter-spacing:.42em; }
+    .title h1 { margin:0; color:#f8f4d8; font:900 clamp(4.2rem,10.5vw,10rem)/.82 Impact,"Arial Black",sans-serif; letter-spacing:.035em; text-shadow:4px 5px 0 rgba(119,77,216,.35),0 0 45px rgba(150,121,255,.28); }
+    .signal { display:flex; align-items:center; gap:.7rem; margin-top:1rem; color:rgba(255,255,255,.66); font:500 clamp(.68rem,.85vw,.9rem)/1 Consolas,monospace; letter-spacing:.14em; }
+    .signal i { width:7px; height:7px; border-radius:50%; background:#83ffbd; box-shadow:0 0 14px #83ffbd; animation:blink 1.8s steps(2) infinite; }
+    .nandu-box { position:absolute; z-index:7; right:-1vw; top:50%; width:min(56vw,820px); aspect-ratio:1; transform:translateY(-50%); display:grid; place-items:center; opacity:.98; -webkit-mask-image:radial-gradient(ellipse 69% 67% at 55% 51%,#000 45%,rgba(0,0,0,.88) 64%,transparent 88%); mask-image:radial-gradient(ellipse 69% 67% at 55% 51%,#000 45%,rgba(0,0,0,.88) 64%,transparent 88%); }
+    .halo { position:absolute; inset:8%; border-radius:50%; background:radial-gradient(circle,rgba(137,91,255,.22),rgba(56,219,255,.08) 45%,transparent 72%); }
+    .nandu { position:relative; z-index:2; width:100%; height:100%; object-fit:cover; filter:saturate(1.06) contrast(1.02) drop-shadow(0 22px 28px rgba(0,0,0,.34)); }
+    .orbit { position:absolute; z-index:4; right:4vw; bottom:17vh; width:min(52vw,780px); aspect-ratio:1.8; border:1px solid rgba(123,222,255,.22); border-radius:50%; transform:rotate(-13deg); animation:pulse 7s ease-in-out infinite; }
+    .orbit:after { content:""; position:absolute; width:8px; height:8px; left:17%; top:5%; border-radius:50%; background:var(--gold); box-shadow:0 0 15px 4px rgba(255,229,154,.6); }
+    .ticker { position:absolute; z-index:12; left:0; right:0; bottom:0; overflow:hidden; border-top:1px solid rgba(133,207,255,.18); background:rgba(3,5,20,.62); color:rgba(230,244,255,.36); font:600 .68rem/2.5rem Consolas,monospace; letter-spacing:.36em; white-space:nowrap; }
+    .ticker div { width:max-content; animation:marquee 28s linear infinite; }
+    .fullscreen { position:absolute; z-index:30; right:1rem; top:1rem; min-height:42px; padding:.6rem .9rem; border:1px solid rgba(145,211,255,.28); border-radius:999px; background:rgba(6,9,31,.55); color:rgba(240,247,255,.75); cursor:pointer; }
+    .fullscreen:hover { color:white; border-color:rgba(145,211,255,.7); }
+    @keyframes twinkle { 0%,100%{opacity:.2;transform:scale(.7)} 50%{opacity:1;transform:scale(1.3)} }
+    @keyframes breathe { to{opacity:.28;transform:scale(1.12) translate(2vw,2vh)} }
+    @keyframes hover { 50%{transform:translateY(-14px) rotate(.5deg)} }
+    @keyframes codeFloat { 0%,100%{transform:translate(0);opacity:.24} 50%{transform:translate(20px,-24px);opacity:.58} }
+    @keyframes drift { to{transform:translate(12px,-8px);opacity:.68} }
+    @keyframes pulse { 50%{opacity:.45;transform:rotate(-10deg) scale(1.03)} }
+    @keyframes marquee { to{transform:translateX(-50%)} }
+    @keyframes blink { 50%{opacity:.25} }
+    @media(max-width:760px){.title{top:21%;left:7vw}.title h1{font-size:19vw}.nandu-box{right:-24vw;top:64%;width:112vw}.code:nth-of-type(even){display:none}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important}}
+  </style>
+</head>
+<body>
+  <main class="cosmos">
+    <div class="aurora a1"></div><div class="aurora a2"></div>
+    <div id="stars" aria-hidden="true"></div>
+    <svg class="constellations" viewBox="0 0 1600 900" aria-hidden="true">
+      <g><path d="M100 160 220 110 310 190 410 115 510 180"/><circle cx="100" cy="160" r="4"/><circle cx="220" cy="110" r="4"/><circle cx="310" cy="190" r="4"/><circle cx="410" cy="115" r="4"/><circle cx="510" cy="180" r="4"/></g>
+      <g><path d="M1130 235 1240 170 1335 250 1450 180 1510 285 1390 335 1335 250"/><circle cx="1130" cy="235" r="4"/><circle cx="1240" cy="170" r="4"/><circle cx="1335" cy="250" r="4"/><circle cx="1450" cy="180" r="4"/><circle cx="1510" cy="285" r="4"/><circle cx="1390" cy="335" r="4"/></g>
+    </svg>
+    <span class="code" style="left:7%;top:21%;animation-delay:-2s">si (estudiar) entonces aprender();</span>
+    <span class="code" style="left:64%;top:17%;animation-delay:-8s">para cada idea en sueños { crear(); }</span>
+    <span class="code" style="left:4%;top:71%;animation-delay:-14s">mientras (hayaCuriosidad) { explorar(); }</span>
+    <span class="code" style="left:69%;top:74%;animation-delay:-5s">constante futuro = infinito;</span>
+    <span class="code" style="left:39%;top:9%;animation-delay:-11s">función imaginar() { hacerPosible(); }</span>
+    <section class="title"><p>Mira al cielo</p><h1>NAUOXO</h1><div class="signal"><i></i> So Mañec Piguem Le’ec – El Ñandú del Cielo</div></section>
+    <div class="orbit"></div>
+    <div class="nandu-box"><div class="halo"></div><img class="nandu" src="nandu-animado.gif" alt="Ñandú animado bajo un cielo de constelaciones"></div>
+    <div class="ticker"><div>SI · ENTONCES · PARA CADA · MIENTRAS · CREAR · IMAGINAR · APRENDER · COMPARTIR · SI · ENTONCES · PARA CADA · MIENTRAS · CREAR · IMAGINAR · APRENDER · COMPARTIR ·</div></div>
+    <button class="fullscreen" onclick="document.documentElement.requestFullscreen?.()">⛶ Pantalla completa</button>
+  </main>
+  <script>
+    const stars = document.getElementById('stars');
+    for(let i=0;i<72;i++){
+      const star=document.createElement('i'); star.className='star';
+      const size=1+(i*7)%3;
+      Object.assign(star.style,{left:`${(i*47+11)%100}%`,top:`${(i*31+7)%94}%`,width:`${size}px`,height:`${size}px`,animationDelay:`-${(i*.37)%5}s`});
+      stars.appendChild(star);
+    }
+  </script>
+</body>
+</html>

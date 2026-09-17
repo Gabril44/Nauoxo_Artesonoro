@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NAUOxO — Pantalla del stand</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #050716; }
+    .scene {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 2s ease-in-out, visibility 0s linear 2s;
+      background: #050716;
+    }
+    .scene.active {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 2s ease-in-out;
+    }
+    .click-area {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      cursor: pointer;
+      background: transparent;
+      border: 0;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .scene { transition-duration: .4s; }
+    }
+  </style>
+</head>
+<body>
+  <iframe class="scene active" src="nauoxo-gif.html" title="NAUOXO — El Ñandú del Cielo"></iframe>
+  <iframe class="scene" src="Miguel%20angel.html" title="NAUOXO — Escena de Miguel Ángel"></iframe>
+  <iframe class="scene" src="proyecto-qr.html?qr=qr-proyecto-1.png&amp;n=01" title="Información del proyecto 1"></iframe>
+  <iframe class="scene" src="proyecto-qr.html?qr=qr-proyecto-2.png&amp;n=02" title="Información del proyecto 2"></iframe>
+  <button class="click-area" type="button" aria-label="Cambiar a la otra escena"></button>
+
+  <script>
+    const scenes = [...document.querySelectorAll('.scene')];
+    const clickArea = document.querySelector('.click-area');
+    const FIVE_MINUTES = 5 * 60 * 1000;
+    let current = 0;
+    let timer;
+
+    function changeScene() {
+      scenes[current].classList.remove('active');
+      current = (current + 1) % scenes.length;
+      scenes[current].classList.add('active');
+    }
+
+    function restartTimer() {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        changeScene();
+        restartTimer();
+      }, FIVE_MINUTES);
+    }
+
+    clickArea.addEventListener('click', () => {
+      changeScene();
+      restartTimer();
+    });
+
+    restartTimer();
+  </script>
+</body>
+</html>
