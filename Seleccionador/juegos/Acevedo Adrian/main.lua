@@ -37,7 +37,7 @@ love.keyboard.isDown = function(...)
 end
 assert(love.filesystem.load('juego.lua'))()
 original = {}
-for _,name in ipairs({'load','draw','update','keypressed','keyreleased','mousepressed','mousereleased','mousemoved'}) do original[name]=love[name] end
+for _,name in ipairs({'load','draw','update','resize','keypressed','keyreleased','mousepressed','mousereleased','mousemoved'}) do original[name]=love[name] end
 local function press(key)
   held[key] = (held[key] or 0)+1
   if original.keypressed then original.keypressed(key,key,false) end
@@ -69,10 +69,18 @@ function love.load(args)
   end
   realSetMode(test and test.w or 0,test and test.h or 0,{fullscreen=not test,fullscreentype='desktop',resizable=true,minwidth=320,minheight=320})
   local dw,dh=realDimensions()
-  if cfg.cards and dh>dw then gw,gh=800,1100 end
+  if cfg.cards then gw,gh=dw,math.max(1,dh-56) end
   if original.load then original.load(args) end
   canvas=love.graphics.newCanvas(gw,gh)
   uiFont=love.graphics.newFont(15)
+end
+function love.resize(w,h)
+  if cfg.cards and canvas then
+    gw,gh=w,math.max(1,h-56)
+    canvas:release()
+    canvas=love.graphics.newCanvas(gw,gh)
+    if original.resize then original.resize(gw,gh) end
+  end
 end
 function love.update(dt)
   if original.update then original.update(math.min(dt,0.05)) end
@@ -80,7 +88,7 @@ function love.update(dt)
     frames=frames+1
     if frames==2 and not cfg.cards then press(cfg.start or 'space') end
     if frames==3 and not cfg.cards then release(cfg.start or 'space') end
-    if frames==5 and cfg.cards and original.mousepressed then original.mousepressed(gw/2,gh/2,1) end
+    if frames==5 and cfg.cards and original.mousepressed then original.mousepressed(gw*0.4,gh*0.3,1) end
   end
 end
 function love.draw()

@@ -553,14 +553,14 @@ function love.mousepressed(x, y, button)
         return
     end
 
-    if x >= 30 and x <= 70 and y >= screenHeight - 110 and y <= screenHeight - 70 then
+    if x >= 30 and x <= 70 and false then
         volumenActual = math.max(0, volumenActual - 0.1)
         musica:setVolume(volumenActual)
         return
     end
 
     -- Botón Más (+)
-    if x >= 80 and x <= 120 and y >= screenHeight - 110 and y <= screenHeight - 70 then
+    if x >= 80 and x <= 120 and false then
         volumenActual = math.min(1, volumenActual + 0.1)
         musica:setVolume(volumenActual)
         return
@@ -631,4 +631,93 @@ function love.keypressed(key)
         reiniciarJuego()
     end
 
+end
+-- Native-size responsive board, keeping all 16 cards and the current round.
+local compactFont
+local function arrangeCards()
+    screenWidth,screenHeight=love.graphics.getDimensions()
+    espacio=10
+    local best=0
+    for _,cols in ipairs({4,6,8,2}) do
+        local rows=math.ceil(#cartas/cols)
+        local size=math.floor(math.min((screenWidth-24-(cols-1)*espacio)/cols,(screenHeight-106-(rows-1)*espacio)/rows))
+        if size>best then best=size;columnas=cols end
+    end
+    cartaAncho,cartaAlto=best,best
+    local rows=math.ceil(#cartas/columnas)
+    inicioY=54+(screenHeight-106-(rows*best+(rows-1)*espacio))/2
+    for i,c in ipairs(cartas) do
+        local row=math.floor((i-1)/columnas)
+        local count=math.min(columnas,#cartas-row*columnas)
+        local left=(screenWidth-(count*best+(count-1)*espacio))/2
+        c.x=left+((i-1)%columnas)*(best+espacio)
+        c.y=inicioY+row*(best+espacio)
+        c.ancho,c.alto=best,best
+    end
+end
+local createOriginal=crearCartas
+function crearCartas() createOriginal();arrangeCards() end
+function love.resize() arrangeCards();inicializarEstrellas() end
+function dibujarCarta(c)
+    love.graphics.setColor(0.20,0.29,0.56)
+    love.graphics.rectangle('fill',c.x,c.y,c.ancho,c.alto,8,8)
+    if c.descubierta or c.encontrada then
+        local s=math.min((c.ancho-4)/c.imagen:getWidth(),(c.alto-4)/c.imagen:getHeight())
+        love.graphics.setColor(1,1,1)
+        love.graphics.draw(c.imagen,c.x+c.ancho/2,c.y+c.alto/2,0,s,s,c.imagen:getWidth()/2,c.imagen:getHeight()/2)
+    else
+        love.graphics.setFont(fuenteGrande)
+        love.graphics.setColor(0.9,0.94,1)
+        love.graphics.printf('?',c.x,c.y+(c.alto-fuenteGrande:getHeight())/2,c.ancho,'center')
+    end
+    love.graphics.setColor(c.encontrada and 0.4 or 0.9,1,c.encontrada and 0.5 or 1)
+    love.graphics.setLineWidth(2)
+    love.graphics.rectangle('line',c.x,c.y,c.ancho,c.alto,8,8)
+end
+function love.draw()
+    compactFont=compactFont or love.graphics.newFont(18)
+    love.graphics.clear(0.05,0.05,0.08)
+    for _,s in ipairs(estrellas) do
+        love.graphics.setColor(s.brillo,s.brillo,s.brillo)
+        love.graphics.circle('fill',s.x,s.y,s.radio)
+    end
+    love.graphics.setFont(compactFont)
+    love.graphics.setColor(1,1,1)
+    love.graphics.printf('MEMORIA  ·  '..paresEncontrados..'/8 pares  ·  '..movimientos..' movimientos',8,10,screenWidth-16,'center')
+    for _,c in ipairs(cartas) do dibujarCarta(c) end
+    love.graphics.setFont(compactFont)
+    for i,label in ipairs({'−','+'}) do
+        local x=12+(i-1)*48
+        love.graphics.setColor(0.2,0.2,0.4)
+        love.graphics.rectangle('fill',x,screenHeight-44,40,36,6,6)
+        love.graphics.setColor(1,1,1)
+        love.graphics.printf(label,x,screenHeight-41,40,'center')
+    end
+    love.graphics.setColor(0.8,0.85,0.9)
+    love.graphics.print(math.floor(volumenActual*100)..'%',110,screenHeight-39)
+    love.graphics.printf('Arce Alan',160,screenHeight-39,math.max(1,screenWidth-300),'center')
+    love.graphics.setColor(0.27,0.44,0.2)
+    love.graphics.rectangle('fill',screenWidth-130,screenHeight-44,118,36,6,6)
+    love.graphics.setColor(1,1,1)
+    love.graphics.printf('Reiniciar',screenWidth-130,screenHeight-41,118,'center')
+    if juegoTerminado then
+        love.graphics.setColor(0,0,0,0.75)
+        love.graphics.rectangle('fill',0,screenHeight/2-70,screenWidth,140)
+        love.graphics.setColor(1,1,1)
+        love.graphics.setFont(fuenteGrande)
+        love.graphics.printf('¡GANASTE!',0,screenHeight/2-55,screenWidth,'center')
+        love.graphics.setFont(fuente)
+        love.graphics.printf('Tocá Reiniciar para volver a jugar',0,screenHeight/2+8,screenWidth,'center')
+    end
+end
+local clickOriginal=love.mousepressed
+function love.mousepressed(x,y,b)
+    if b~=1 then return end
+    if y>=screenHeight-44 then
+        if x>=12 and x<=52 then volumenActual=math.max(0,volumenActual-0.1);musica:setVolume(volumenActual)
+        elseif x>=60 and x<=100 then volumenActual=math.min(1,volumenActual+0.1);musica:setVolume(volumenActual)
+        elseif x>=screenWidth-130 and x<=screenWidth-12 then reiniciarJuego() end
+        return
+    end
+    clickOriginal(x,y,b)
 end
