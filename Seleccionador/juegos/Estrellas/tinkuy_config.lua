@@ -1,0 +1,1 @@
+return {width=800,height=600,keys={{'left','Izquierda'},{'right','Derecha'},{'space','Impulso'},{'return','Jugar'},{'h','Historia'},{'backspace','Atrás'},{'1','Capítulo 1'},{'2','Capítulo 2'},{'3','Capítulo 3'},{'4','Capítulo 4'}},start='return',cards=false}

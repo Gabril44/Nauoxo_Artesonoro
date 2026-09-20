@@ -1,0 +1,1 @@
+function love.conf(t) t.identity='Tinkuy-RomeroMauro'; t.window.title='TINKUY - Romero Mauro'; t.window.resizable=true; t.window.width=800; t.window.height=600 end

@@ -1,0 +1,1 @@
+return {width=800,height=600,keys={{'space','Volar / jugar'}},start='space',cards=false}

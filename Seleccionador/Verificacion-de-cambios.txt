@@ -1,0 +1,13 @@
+Verificación de TINKUY
+
+- Cinco juegos Lua: inicio, dibujo y salida al selector comprobados a
+  1280x720, 800x800 y 480x900 (15 pruebas).
+- Dos juegos HTML: inicio sin errores de JavaScript y sin desbordamiento
+  horizontal a 1280x720, 800x800 y 390x844 (6 pruebas).
+- Ventana web en modo kiosco: área de juego de 1536x864 en pantalla de
+  1536x864; cierre con botón Volver y con Escape comprobados.
+- Selector: inicio a pantalla completa y siete proyectos encontrados.
+- Cartas: corregido el recorte del tablero; las 16 cartas quedan visibles.
+
+Estas pruebas verifican inicio, adaptación visual y retorno. No equivalen
+ a completar todos los niveles ni a probar todos los dispositivos físicos.

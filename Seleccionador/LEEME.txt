@@ -1,0 +1,29 @@
+TINKUY — Seleccionador de juegos
+
+Abrí TINKUY.exe. No hace falta instalar Lua ni LÖVE.
+Elegí con clic o con las flechas y Enter. F11 cambia a pantalla completa.
+Al elegir un juego aparece una animación de pétalos rosados.
+Todos los juegos abren en pantalla completa.
+ESC o el botón Volver a TINKUY cierra el juego y permite elegir otro.
+Hay controles en pantalla para mouse o pantallas táctiles.
+Acevedo Ramon conserva el sonido del salto, sin la canción de fondo.
+
+La imagen se ajusta sin deformarse ni recortarse. Según la relación de
+aspecto pueden quedar márgenes. El tablero de cartas muestra sus 16 cartas.
+Los HTML se abren desde Lua en una ventana de Microsoft Edge sin pestañas,
+en pantalla completa. Requieren Edge instalado; no se ejecutan dentro del
+motor LÖVE. Si se abren manualmente en un navegador, puede ser necesario
+cerrar la pestaña o usar Alt+F4 para volver.
+
+Este ejecutable es para Windows. No es una aplicación Android/iOS.
+Los HTML también tienen diseño adaptable y controles táctiles.
+
+Para llevarlo a otra computadora, copiá TODA la carpeta TINKUY.
+El ejecutable necesita las DLL, motor y juegos que lo acompañan.
+Los archivos originales se conservaron: esta carpeta contiene copias.
+Se incluye una sola versión del juego de cartas. Fondo verde #457134.
+
+El código del selector está en codigo/main.lua y codigo/conf.lua.
+En cada juego Lua: juego.lua es el juego adaptado y main.lua es la capa
+común de pantalla completa, escalado, controles y retorno al selector.
+El motor incluido es LÖVE 11.5 para Windows, con su licencia adjunta.

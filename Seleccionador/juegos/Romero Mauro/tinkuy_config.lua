@@ -1,0 +1,1 @@
+return {width=960,height=540,keys={{'left','Izquierda'},{'right','Derecha'},{'space','Saltar'},{'return','Continuar'},{'e','Acción'}},start='return',cards=false}
